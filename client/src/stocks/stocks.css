@@ -1,0 +1,268 @@
+.stocks-page {
+  --s-bg: #000;
+  --s-surface: #0b0d12;
+  --s-raised: #151922;
+  --s-border: #1f2430;
+  --s-text: #f3f4f6;
+  --s-muted: #9ca3af;
+  --s-up: #22c55e;
+  --s-down: #ef4444;
+  --s-rsi: #fb923c;
+}
+
+.stocks-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+  background: var(--s-bg);
+  color: var(--s-text);
+}
+
+.stocks-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.quote h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 2vw, 2.5rem);
+  line-height: 1.2;
+}
+
+.quote-price {
+  opacity: 0.92;
+}
+
+.quote-change {
+  font-size: 0.8em;
+  font-weight: 700;
+}
+
+.quote-change.up { color: var(--s-up); }
+.quote-change.down { color: var(--s-down); }
+
+.quote-name {
+  margin: 6px 0 0;
+  color: var(--s-muted);
+}
+
+.stock-search {
+  position: relative;
+  width: min(420px, 100%);
+}
+
+.stock-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  transform: translateY(-50%);
+  stroke: var(--s-muted);
+  fill: none;
+  stroke-width: 2;
+}
+
+.stock-search input {
+  width: 100%;
+  background: var(--s-surface);
+  color: var(--s-text);
+  border: 1px solid var(--s-border);
+  border-radius: 12px;
+  padding: 12px 14px 12px 42px;
+  font-size: 1rem;
+}
+
+.stock-search input:focus {
+  outline: 2px solid rgba(96, 165, 250, 0.6);
+  outline-offset: 1px;
+}
+
+.stock-search-results {
+  position: absolute;
+  z-index: 10;
+  left: 0;
+  right: 0;
+  margin: 8px 0 0;
+  background: rgba(11, 13, 18, 0.98);
+  border: 1px solid var(--s-border);
+  border-radius: 12px;
+  list-style: none;
+  padding: 0;
+  max-height: 280px;
+  overflow: auto;
+}
+
+.stock-search-results li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--s-border);
+  cursor: pointer;
+}
+
+.stock-search-results li.active {
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.result-symbol {
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.result-name {
+  color: var(--s-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-meta {
+  color: var(--s-muted);
+  font-size: 0.8rem;
+}
+
+.range-bar {
+  display: inline-flex;
+  gap: 8px;
+  background: var(--s-surface);
+  border: 1px solid var(--s-border);
+  border-radius: 999px;
+  padding: 6px;
+  margin-bottom: 18px;
+}
+
+.range-bar button {
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--s-muted);
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.range-bar button.active {
+  background: #1f2937;
+  color: var(--s-text);
+}
+
+.stocks-error {
+  margin: 0 0 16px;
+  color: var(--s-down);
+}
+
+.stocks-body {
+  display: grid;
+  grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.indicator-panel {
+  background: var(--s-surface);
+  border: 1px solid var(--s-border);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.indicator-panel h2 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.indicator-time {
+  color: var(--s-muted);
+  margin: 0 0 12px;
+}
+
+.indicator-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--s-border);
+}
+
+.indicator-row dt {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--s-muted);
+}
+
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.indicator-row dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.chart-area {
+  position: relative;
+  min-height: 520px;
+  background: var(--s-surface);
+  border: 1px solid var(--s-border);
+  border-radius: 16px;
+  padding: 12px 12px 10px;
+}
+
+.chart-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--s-muted);
+  font-size: 0.8rem;
+  margin-bottom: 8px;
+}
+
+.rsi-label {
+  color: var(--s-rsi);
+}
+
+.stock-chart {
+  width: 100%;
+  height: 440px;
+}
+
+.chart-loading {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(11, 13, 18, 0.72);
+  border: 1px solid var(--s-border);
+  border-radius: 999px;
+  padding: 8px 12px;
+  color: var(--s-text);
+}
+
+.stocks-footnote {
+  margin-top: 16px;
+  color: var(--s-muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 860px) {
+  .stocks-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .stocks-body {
+    grid-template-columns: 1fr;
+  }
+
+  .stock-search {
+    width: 100%;
+  }
+}
