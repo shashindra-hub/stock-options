@@ -6,8 +6,9 @@ import {
   StockValidationError,
   UpstreamError,
 } from './stocks.js';
+import { screenWatchlist } from './screener/screener.js';
 
-export function createApp({ stockService = createStockService() } = {}) {
+export function createApp({ stockService = createStockService(), screenerService = { watchlist: screenWatchlist } } = {}) {
   const app = express();
 
   app.use(cors());
@@ -20,6 +21,15 @@ export function createApp({ stockService = createStockService() } = {}) {
   app.get('/api/stocks/search', async (req, res, next) => {
     try {
       res.json(await stockService.search(req.query.q));
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  app.get('/api/stocks/screener', async (_req, res, next) => {
+    try {
+      const asOf = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+      res.json({ asOf, results: await screenerService.watchlist(asOf) });
     } catch (err) {
       next(err);
     }

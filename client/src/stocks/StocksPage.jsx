@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import StockChart from './StockChart.jsx';
+import ScreenerPage from './ScreenerPage.jsx';
 import StockSearch from './StockSearch.jsx';
 import { RANGES, stockApi } from './stockApi.js';
 import { COLORS, OVERLAYS } from './series.js';
@@ -7,6 +8,14 @@ import { formatChange, formatPercent, formatPrice, formatTime, formatVolume } fr
 import './stocks.css';
 
 const DEFAULT_SYMBOL = 'AMZN';
+
+function readPageLocation() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    view: params.get('view') === 'screener' ? 'screener' : 'chart',
+    symbol: params.get('symbol')?.toUpperCase() || DEFAULT_SYMBOL,
+  };
+}
 
 function IndicatorPanel({ data, point }) {
   const p = point ?? data.points[data.points.length - 1];
@@ -53,14 +62,30 @@ function IndicatorPanel({ data, point }) {
 }
 
 export default function StocksPage() {
-  const [symbol, setSymbol] = useState(DEFAULT_SYMBOL);
+  const [location, setLocation] = useState(readPageLocation);
+  const { view, symbol } = location;
   const [range, setRange] = useState('1D');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [hoverPoint, setHoverPoint] = useState(null);
 
+  function navigate(nextView, nextSymbol = symbol) {
+    const params = new URLSearchParams(window.location.search);
+    params.set('view', nextView);
+    params.set('symbol', nextSymbol);
+    window.history.pushState({}, '', `${window.location.pathname}?${params}${window.location.hash}`);
+    setLocation({ view: nextView, symbol: nextSymbol });
+  }
+
   useEffect(() => {
+    const syncLocation = () => setLocation(readPageLocation());
+    window.addEventListener('popstate', syncLocation);
+    return () => window.removeEventListener('popstate', syncLocation);
+  }, []);
+
+  useEffect(() => {
+    if (view !== 'chart') return undefined;
     const controller = new AbortController();
     setLoading(true);
     setError('');
@@ -77,15 +102,29 @@ export default function StocksPage() {
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [symbol, range]);
+  }, [symbol, range, view]);
 
   const up = (data?.change ?? 0) >= 0;
 
   return (
     <div className="stocks-page">
+      <nav className="stocks-view-nav" aria-label="Stock views">
+        <button type="button" className={view === 'chart' ? 'active' : ''} aria-current={view === 'chart' ? 'page' : undefined} onClick={() => navigate('chart')}>
+          Chart
+        </button>
+        <button type="button" className={view === 'screener' ? 'active' : ''} aria-current={view === 'screener' ? 'page' : undefined} onClick={() => navigate('screener')}>
+          Screener
+        </button>
+      </nav>
+
       <header className="stocks-header">
         <div className="quote" data-testid="stock-quote">
-          {data ? (
+          {view === 'screener' ? (
+            <>
+              <h1>Market screener</h1>
+              <p className="quote-name">Daily technicals and put opportunities</p>
+            </>
+          ) : data ? (
             <>
               <h1>
                 {data.symbol} <span className="quote-price">{formatPrice(data.price, data.currency)}</span>{' '}
@@ -101,9 +140,12 @@ export default function StocksPage() {
             <h1>{symbol}</h1>
           )}
         </div>
-        <StockSearch onSelect={setSymbol} />
+        {view === 'chart' && <StockSearch onSelect={(nextSymbol) => navigate('chart', nextSymbol)} />}
       </header>
 
+      {view === 'screener' ? (
+        <ScreenerPage onSelect={(nextSymbol) => navigate('chart', nextSymbol)} />
+      ) : <>
       <div className="range-bar" role="group" aria-label="Chart range">
         {RANGES.map((r) => (
           <button
@@ -144,6 +186,7 @@ export default function StocksPage() {
       <p className="stocks-footnote">
         Market data from Yahoo Finance, may be delayed. Not investment advice.
       </p>
+      </>}
     </div>
   );
 }
