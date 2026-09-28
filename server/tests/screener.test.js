@@ -39,6 +39,12 @@ describe('evaluateTechnicals', () => {
     expect(t.belowEma).toBe(false);
     expect(t.rsiInRange).toBe(false);
   });
+
+  test('includes SMA200 when enough daily closes are available', () => {
+    const t = evaluateTechnicals({ price: 90, previousClose: 100, closes: [...new Array(201).fill(100), 100] });
+    expect(t.sma200).toBeCloseTo(99.95, 2);
+    expect(t.sma200GapPercent).toBeCloseTo(-9.95, 1);
+  });
 });
 
 describe('pickPut', () => {

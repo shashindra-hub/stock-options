@@ -38,4 +38,16 @@ describe('stock routes', () => {
     expect(res.status).toBe(200);
     expect(res.body).toEqual([{ symbol: 'AAPL', name: 'Apple Inc.' }]);
   });
+
+  test('GET /api/stocks/screener returns the watchlist and market date', async () => {
+    const app = createApp({
+      stockService: { search: async () => [], chart: async () => ({}) },
+      screenerService: { watchlist: async (today) => [{ symbol: 'INTC', today }] },
+    });
+    const res = await request(app).get('/api/stocks/screener');
+
+    expect(res.status).toBe(200);
+    expect(res.body.asOf).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(res.body.results).toEqual([{ symbol: 'INTC', today: res.body.asOf }]);
+  });
 });

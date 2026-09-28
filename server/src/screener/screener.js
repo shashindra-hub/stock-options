@@ -1,7 +1,7 @@
-import { ema, rsi } from '../indicators.js';
+import { ema, rsi, sma } from '../indicators.js';
 import { fetchDailyHistory, fetchPuts } from './marketData.js';
 
-export const DEFAULT_SYMBOLS = ['MRVL', 'INTC', 'TSLA', 'SPCX', 'NVDA', 'SOXL', 'HOOD', 'AMZN', 'GOOGL'];
+export const DEFAULT_SYMBOLS = ['MRVL', 'INTC', 'TSLA', 'SPCX', 'NVDA', 'SOXL', 'HOOD', 'AMZN', 'GOOG'];
 
 export const RULES = {
   emaPeriod: 50,
@@ -22,6 +22,7 @@ export function daysToExpiration(expiration, today) {
 export function evaluateTechnicals({ price, previousClose, closes }, rules = RULES) {
   const series = [...closes.slice(0, -1), price];
   const emaValue = ema(series, rules.emaPeriod).at(-1);
+  const sma200Value = sma(series, 200).at(-1);
   const rsiValue = rsi(series, rules.rsiPeriod).at(-1);
   const changePercent = ((price - previousClose) / previousClose) * 100;
 
@@ -33,6 +34,8 @@ export function evaluateTechnicals({ price, previousClose, closes }, rules = RUL
     ema: emaValue,
     emaGapPercent: emaValue === null ? null : ((price - emaValue) / emaValue) * 100,
     belowEma: emaValue !== null && price < emaValue,
+    sma200: sma200Value,
+    sma200GapPercent: sma200Value === null ? null : ((price - sma200Value) / sma200Value) * 100,
     rsi: rsiValue,
     rsiInRange: rsiValue !== null && rsiValue >= rules.rsiMin && rsiValue <= rules.rsiMax,
   };
@@ -85,6 +88,10 @@ export async function screenSymbol(symbol, today, { fetchImpl, rules = RULES } =
   } catch (err) {
     return { symbol, error: err.message };
   }
+}
+
+export async function screenWatchlist(today, symbols = DEFAULT_SYMBOLS) {
+  return Promise.all(symbols.map((symbol) => screenSymbol(symbol, today)));
 }
 
 const money = (n, digits = 2) =>

@@ -17,4 +17,9 @@ export const stockApi = {
     );
     return handleResponse(res);
   },
+
+  async screener({ signal } = {}) {
+    const res = await fetch(`${BASE_URL}/screener`, { signal });
+    return handleResponse(res);
+  },
 };
